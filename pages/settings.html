@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AKB Engineering Quotation System</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="sidebar-logo-text">
+                        <h3>AKB</h3>
+                        <p>Engineering</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="inquiries.html" class="nav-item">
+                    <i class="fas fa-inbox"></i>
+                    <span>Inquiries</span>
+                </a>
+                <a href="quotations.html" class="nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Quotations</span>
+                </a>
+                <a href="products.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </a>
+                <a href="customers.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Customers</span>
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <h4 id="userName">Admin</h4>
+                        <p>Administrator</p>
+                    </div>
+                </a>
+                <button class="btn btn-secondary btn-sm" data-action="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="header-title">
+                        <h1>Settings</h1>
+                        <p>Configure your system and company details</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="header-btn" id="themeToggleDashboard">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Company Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>
+                            <i class="fas fa-building"></i> Company Information
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <form id="companyForm">
+                            <div class="form-grid">
+                                <div class="form-input-group">
+                                    <label for="companyName">Company Name</label>
+                                    <input type="text" id="companyName" placeholder="AKB Engineering">
+                                </div>
+
+                                <div class="form-input-group">
+                                    <label for="companyEmail">Email</label>
+                                    <input type="email" id="companyEmail" placeholder="info@akb-engineering.com">
+                                </div>
+
+                                <div class="form-input-group">
+                                    <label for="companyPhone">Phone</label>
+                                    <input type="tel" id="companyPhone" placeholder="+1-800-XXX-XXXX">
+                                </div>
+
+                                <div class="form-input-group">
+                                    <label for="companyWebsite">Website</label>
+                                    <input type="url" id="companyWebsite" placeholder="www.akb-engineering.com">
+                                </div>
+
+                                <div class="form-input-group" style="grid-column: 1 / -1;">
+                                    <label for="companyAddress">Address</label>
+                                    <input type="text" id="companyAddress" placeholder="123 Industrial Ave, Tech City">
+                                </div>
+
+                                <div class="form-input-group">
+                                    <label for="companyGST">GST Registration Number</label>
+                                    <input type="text" id="companyGST" placeholder="27AABCT1234H1Z0">
+                                </div>
+                            </div>
+
+                            <div class="form-input-group" style="margin-top: var(--spacing-lg);">
+                                <label for="companyTerms">Terms & Conditions</label>
+                                <textarea id="companyTerms" placeholder="Payment terms: Net 30 days&#10;Delivery: As per agreed schedule&#10;Warranty: As per product specifications"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: var(--spacing-lg);">
+                                <i class="fas fa-save"></i> Save Company Details
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="card" style="margin-top: var(--spacing-lg);">
+                    <div class="card-header">
+                        <h2>
+                            <i class="fas fa-database"></i> Data Management
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                            <div style="padding: var(--spacing-lg); background: var(--light-bg); border-radius: var(--radius-md); text-align: center;">
+                                <i class="fas fa-download" style="font-size: 24px; color: var(--primary-color); margin-bottom: var(--spacing-md);"></i>
+                                <h3 style="margin: 0 0 var(--spacing-sm) 0;">Export Data</h3>
+                                <p style="color: var(--text-muted); margin: 0 0 var(--spacing-md) 0; font-size: 13px;">Download all your data as JSON</p>
+                                <button class="btn btn-primary btn-sm" onclick="settingsManager.exportData()">Export</button>
+                            </div>
+
+                            <div style="padding: var(--spacing-lg); background: var(--light-bg); border-radius: var(--radius-md); text-align: center;">
+                                <i class="fas fa-upload" style="font-size: 24px; color: var(--secondary-color); margin-bottom: var(--spacing-md);"></i>
+                                <h3 style="margin: 0 0 var(--spacing-sm) 0;">Import Data</h3>
+                                <p style="color: var(--text-muted); margin: 0 0 var(--spacing-md) 0; font-size: 13px;">Restore data from JSON file</p>
+                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('importFile').click()">Import</button>
+                                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="settingsManager.importData(event)">
+                            </div>
+
+                            <div style="padding: var(--spacing-lg); background: var(--light-bg); border-radius: var(--radius-md); text-align: center;">
+                                <i class="fas fa-trash-alt" style="font-size: 24px; color: var(--accent-color); margin-bottom: var(--spacing-md);"></i>
+                                <h3 style="margin: 0 0 var(--spacing-sm) 0;">Clear All Data</h3>
+                                <p style="color: var(--text-muted); margin: 0 0 var(--spacing-md) 0; font-size: 13px;">Delete all data permanently</p>
+                                <button class="btn btn-danger btn-sm" onclick="settingsManager.confirmClearData()">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Information -->
+                <div class="card" style="margin-top: var(--spacing-lg);">
+                    <div class="card-header">
+                        <h2>
+                            <i class="fas fa-info-circle"></i> System Information
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                            <div>
+                                <label style="font-weight: 600; color: var(--text-muted);">Total Products</label>
+                                <p style="font-size: 24px; font-weight: 700; color: var(--primary-color);">
+                                    <span id="totalProducts">0</span>
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style="font-weight: 600; color: var(--text-muted);">Total Customers</label>
+                                <p style="font-size: 24px; font-weight: 700; color: var(--secondary-color);">
+                                    <span id="totalCustomers">0</span>
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style="font-weight: 600; color: var(--text-muted);">Total Quotations</label>
+                                <p style="font-size: 24px; font-weight: 700; color: var(--accent-color);">
+                                    <span id="totalQuotations">0</span>
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style="font-weight: 600; color: var(--text-muted);">Total Inquiries</label>
+                                <p style="font-size: 24px; font-weight: 700; color: #10b981;">
+                                    <span id="totalInquiries">0</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: var(--spacing-lg); padding: var(--spacing-lg); background: var(--light-bg); border-radius: var(--radius-md);">
+                            <p style="margin: 0 0 var(--spacing-sm) 0; font-size: 13px; color: var(--text-muted);">
+                                <strong>Storage Used:</strong> <span id="storageUsed">0</span> KB / <span id="storageTotal">5000</span> KB
+                            </p>
+                            <div style="width: 100%; height: 8px; background: var(--light-border); border-radius: 4px; overflow: hidden; margin-top: var(--spacing-sm);">
+                                <div id="storageBar" style="height: 100%; background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%); width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About -->
+                <div class="card" style="margin-top: var(--spacing-lg);">
+                    <div class="card-header">
+                        <h2>
+                            <i class="fas fa-heart"></i> About
+                        </h2>
+                    </div>
+                    <div class="card-content">
+                        <p style="color: var(--text-dark); margin: 0 0 var(--spacing-md) 0;">
+                            <strong>AKB Engineering Quotation Management System v1.0</strong>
+                        </p>
+                        <p style="color: var(--text-muted); margin: 0;">
+                            A modern, professional quotation management application designed for industrial pump and engineering companies. 
+                            This system helps streamline your quotation process with automated generation, PDF export, and customer management.
+                        </p>
+                        <div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--light-border);">
+                            <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+                                © 2024 AKB Engineering. All rights reserved. | 
+                                <a href="#" style="color: var(--primary-color); text-decoration: none;">Privacy Policy</a> | 
+                                <a href="#" style="color: var(--primary-color); text-decoration: none;">Terms of Service</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotations - AKB Engineering Quotation System</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="sidebar-logo-text">
+                        <h3>AKB</h3>
+                        <p>Engineering</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="inquiries.html" class="nav-item">
+                    <i class="fas fa-inbox"></i>
+                    <span>Inquiries</span>
+                </a>
+                <a href="quotations.html" class="nav-item active">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Quotations</span>
+                </a>
+                <a href="products.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </a>
+                <a href="customers.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Customers</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <h4 id="userName">Admin</h4>
+                        <p>Administrator</p>
+                    </div>
+                </a>
+                <button class="btn btn-secondary btn-sm" data-action="logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="header-title">
+                        <h1>Quotations</h1>
+                        <p>Manage all your quotations</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="quotationSearch" placeholder="Search quotations...">
+                    </div>
+
+                    <div class="header-actions">
+                        <button class="header-btn" id="themeToggleDashboard">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="newQuotationBtn">
+                            <i class="fas fa-plus"></i> New Quotation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Filter and View Tabs -->
+                <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+                    <button class="btn btn-secondary" data-filter="all" onclick="quotationsManager.filterByStatus('all')">
+                        All
+                    </button>
+                    <button class="btn btn-secondary" data-filter="draft" onclick="quotationsManager.filterByStatus('draft')">
+                        Draft
+                    </button>
+                    <button class="btn btn-secondary" data-filter="sent" onclick="quotationsManager.filterByStatus('sent')">
+                        Sent
+                    </button>
+                    <button class="btn btn-secondary" data-filter="accepted" onclick="quotationsManager.filterByStatus('accepted')">
+                        Accepted
+                    </button>
+                    <button class="btn btn-secondary" data-filter="rejected" onclick="quotationsManager.filterByStatus('rejected')">
+                        Rejected
+                    </button>
+                </div>
+
+                <!-- Quotations Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>All Quotations</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-wrapper">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quotation #</th>
+                                        <th>Customer Name</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quotationsTable">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: var(--spacing-xl);">
+                                            <div class="empty-state">
+                                                <div class="empty-state-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                                <div class="empty-state-title">No quotations yet</div>
+                                                <p style="color: var(--text-muted);">Create your first quotation</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New/Edit Quotation Modal -->
+    <div id="quotationModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="quotationModalTitle">Create New Quotation</h2>
+                <button class="modal-close" id="quotationModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="quotationForm" class="modal-body">
+                <!-- Customer Selection -->
+                <div class="form-section">
+                    <div class="form-section-title">Customer Details</div>
+                    <div class="form-grid">
+                        <div class="form-input-group">
+                            <label for="customerSelect">Select Existing Customer or Create New</label>
+                            <select id="customerSelect" onchange="quotationsManager.handleCustomerSelect()">
+                                <option value="">-- Create New Customer --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="newCustomerFields" style="display: none;">
+                        <div class="form-grid">
+                            <div class="form-input-group">
+                                <label for="customerName">Customer Name *</label>
+                                <input type="text" id="customerName" placeholder="Company/Customer name">
+                            </div>
+                            <div class="form-input-group">
+                                <label for="customerEmail">Email</label>
+                                <input type="email" id="customerEmail" placeholder="customer@example.com">
+                            </div>
+                            <div class="form-input-group">
+                                <label for="customerPhone">Phone</label>
+                                <input type="tel" id="customerPhone" placeholder="9999999999">
+                            </div>
+                            <div class="form-input-group">
+                                <label for="customerAddress">Address</label>
+                                <input type="text" id="customerAddress" placeholder="Full address">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products in Quotation -->
+                <div class="form-section">
+                    <div class="form-section-title">Products</div>
+                    <div id="quotationProducts">
+                        <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
+                            <div class="form-input-group">
+                                <label>Product</label>
+                                <select class="product-select" onchange="quotationsManager.updateItemTotal(this)">
+                                    <option value="">-- Select Product --</option>
+                                </select>
+                            </div>
+                            <div class="form-input-group">
+                                <label>Quantity</label>
+                                <input type="number" class="item-quantity" min="1" value="1" onchange="quotationsManager.updateItemTotal(this)">
+                            </div>
+                            <div class="form-input-group">
+                                <label>Unit Price</label>
+                                <input type="number" class="item-price" step="0.01" readonly style="background: var(--light-bg);">
+                            </div>
+                            <div class="form-input-group">
+                                <label>Total</label>
+                                <input type="number" class="item-total" step="0.01" readonly style="background: var(--light-bg);">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="quotationsManager.removeProduct(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary btn-sm" id="addProductBtn" onclick="quotationsManager.addProductRow()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+
+                <!-- Calculations -->
+                <div class="form-section">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-dark);">Subtotal:</label>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--primary-color);">
+                                <span id="subtotal">₹0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-dark);">GST (Avg):</label>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--secondary-color);">
+                                <span id="gstAmount">₹0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-dark);">Discount (%):</label>
+                            <input type="number" id="discountPercent" min="0" max="100" step="0.01" value="0" onchange="quotationsManager.calculateTotals()" style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--light-border); border-radius: var(--radius-md);">
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-dark);">Total Amount:</label>
+                            <div style="font-size: 20px; font-weight: 700; color: #10b981;">
+                                <span id="totalAmount">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-section">
+                    <div class="form-input-group">
+                        <label for="quotationNotes">Notes/Terms</label>
+                        <textarea id="quotationNotes" placeholder="Add any special notes or terms..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top: 1px solid var(--light-border); margin-top: var(--spacing-lg); padding-top: var(--spacing-lg);">
+                    <button type="button" class="btn btn-secondary" id="cancelQuotationBtn" onclick="quotationsManager.closeQuotationModal()">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="quotationsManager.saveDraft()">
+                        <i class="fas fa-save"></i> Save as Draft
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Generate & Send
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/quotations.js"></script>
+</body>
+</html>
