@@ -202,6 +202,10 @@ class QuotationsManager {
                 <input type="number" class="item-price" step="0.01" min="0" onchange="quotationsManager.updateItemTotal(this)">
             </div>
             <div class="form-input-group">
+                <label>GST (%)</label>
+                <input type="number" class="item-gst" step="0.01" min="0" max="100" onchange="quotationsManager.updateItemTotal(this)">
+            </div>
+            <div class="form-input-group">
                 <label>Total</label>
                 <input type="number" class="item-total" step="0.01" readonly style="background: var(--light-bg);">
             </div>
@@ -225,18 +229,26 @@ class QuotationsManager {
         const productSelect = row.querySelector('.product-select');
         const quantityInput = row.querySelector('.item-quantity');
         const priceInput = row.querySelector('.item-price');
+        const gstInput = row.querySelector('.item-gst');
         const totalInput = row.querySelector('.item-total');
 
         const quantity = parseInt(quantityInput.value) || 1;
         let price = parseFloat(priceInput.value) || 0;
+        let gstPercent = parseFloat(gstInput.value) || 0;
 
         if (productSelect && productSelect.value && productSelect.value !== 'manual') {
             const option = productSelect.options[productSelect.selectedIndex];
             price = parseFloat(option.dataset.price) || 0;
+            gstPercent = parseFloat(option.dataset.gst) || 0;
             priceInput.value = price.toFixed(2);
+            gstInput.value = gstPercent.toFixed(2);
         }
 
-        totalInput.value = (price * quantity).toFixed(2);
+        const subtotal = price * quantity;
+        const gstAmount = (subtotal * gstPercent) / 100;
+        const total = subtotal + gstAmount;
+
+        totalInput.value = total.toFixed(2);
         this.calculateTotals();
     }
 
@@ -244,20 +256,25 @@ class QuotationsManager {
         const row = element.closest('.quotation-item');
         const itemName = row.querySelector('.item-name');
         const priceInput = row.querySelector('.item-price');
+        const gstInput = row.querySelector('.item-gst');
         const quantityInput = row.querySelector('.item-quantity');
         const selectedValue = element.value;
 
         if (selectedValue && selectedValue !== 'manual') {
             const option = element.options[element.selectedIndex];
             const price = parseFloat(option.dataset.price) || 0;
+            const gst = parseFloat(option.dataset.gst) || 0;
             itemName.value = option.textContent.split(' - ')[0].trim();
             priceInput.value = price.toFixed(2);
+            gstInput.value = gst.toFixed(2);
         } else if (selectedValue === 'manual') {
             itemName.value = '';
             priceInput.value = '0.00';
+            gstInput.value = '0.00';
         }
 
         priceInput.removeAttribute('readonly');
+        gstInput.removeAttribute('readonly');
         quantityInput.value = quantityInput.value || 1;
         this.updateItemTotal(priceInput);
     }
@@ -279,12 +296,14 @@ class QuotationsManager {
         let totalGST = 0;
 
         items.forEach(item => {
-            const total = parseFloat(item.querySelector('.item-total').value) || 0;
-            const productSelect = item.querySelector('.product-select');
-            const gstPercent = parseFloat(productSelect.options[productSelect.selectedIndex]?.dataset.gst) || 0;
+            const quantity = parseInt(item.querySelector('.item-quantity').value) || 1;
+            const unitPrice = parseFloat(item.querySelector('.item-price').value) || 0;
+            const gstPercent = parseFloat(item.querySelector('.item-gst').value) || 0;
+            const itemSubtotal = unitPrice * quantity;
+            const gstAmount = (itemSubtotal * gstPercent) / 100;
 
-            subtotal += total;
-            totalGST += (total * gstPercent) / 100;
+            subtotal += itemSubtotal;
+            totalGST += gstAmount;
         });
 
         const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
@@ -339,6 +358,10 @@ class QuotationsManager {
                     <input type="number" class="item-price" step="0.01" min="0" onchange="quotationsManager.updateItemTotal(this)">
                 </div>
                 <div class="form-input-group">
+                    <label>GST (%)</label>
+                    <input type="number" class="item-gst" step="0.01" min="0" max="100" onchange="quotationsManager.updateItemTotal(this)">
+                </div>
+                <div class="form-input-group">
                     <label>Total</label>
                     <input type="number" class="item-total" step="0.01" readonly style="background: var(--light-bg);">
                 </div>
@@ -383,12 +406,14 @@ class QuotationsManager {
             const itemNameInput = item.querySelector('.item-name');
             const quantityInput = item.querySelector('.item-quantity');
             const priceInput = item.querySelector('.item-price');
+            const gstInput = item.querySelector('.item-gst');
             const totalInput = item.querySelector('.item-total');
 
             const selectedValue = productSelect ? productSelect.value : '';
             const nameValue = itemNameInput ? itemNameInput.value.trim() : '';
             const quantity = parseInt(quantityInput.value) || 1;
             const unitPrice = parseFloat(priceInput.value) || 0;
+            const gstPercent = parseFloat(gstInput.value) || 0;
             const total = parseFloat(totalInput.value) || 0;
 
             if (!nameValue && (!selectedValue || selectedValue === 'manual')) {
@@ -398,7 +423,6 @@ class QuotationsManager {
             let productId = null;
             let productName = nameValue;
             let brand = '';
-            let gst = 0;
 
             if (selectedValue && selectedValue !== 'manual') {
                 const product = Storage.getProduct(parseInt(selectedValue));
@@ -406,10 +430,7 @@ class QuotationsManager {
                     productId = product.id;
                     productName = productName || product.name;
                     brand = product.brand;
-                    gst = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst) || 0;
                 }
-            } else {
-                gst = parseFloat(productSelect.options[productSelect.selectedIndex]?.dataset.gst) || 0;
             }
 
             products.push({
@@ -418,7 +439,7 @@ class QuotationsManager {
                 brand: brand,
                 quantity: quantity,
                 unitPrice: unitPrice,
-                gst: gst,
+                gst: gstPercent,
                 total: total
             });
         });
@@ -528,6 +549,10 @@ class QuotationsManager {
                     <input type="number" class="item-price" step="0.01" min="0" value="${item.unitPrice}" onchange="quotationsManager.updateItemTotal(this)">
                 </div>
                 <div class="form-input-group">
+                    <label>GST (%)</label>
+                    <input type="number" class="item-gst" step="0.01" min="0" max="100" value="${item.gst}" onchange="quotationsManager.updateItemTotal(this)">
+                </div>
+                <div class="form-input-group">
                     <label>Total</label>
                     <input type="number" class="item-total" step="0.01" value="${item.total}" readonly style="background: var(--light-bg);">
                 </div>
@@ -597,10 +622,11 @@ class QuotationsManager {
                 <div class="quotation">
                     <div class="header">
                         <div class="company-info">
-                            <h1>${company.name}</h1>
-                            <p>${company.email}</p>
-                            <p>${company.phone}</p>
-                            <p>${company.address}</p>
+                            <h1 style="color: #0066cc; font-weight: 800; letter-spacing: 0.12em; text-transform: lowercase;">grundfos</h1>
+                            <h2>${company.name}</h2>
+                            <p><strong>Phone:</strong> 9935203521</p>
+                            <p><strong>Email:</strong> akbengineering99@gmail.com</p>
+                            <p><strong>Address:</strong> Bhurarani, Rudrapur (U.S. Nagar), Uttarakhand - 263153</p>
                         </div>
                         <div class="quotation-number">
                             <h2>${quotation.quotationNumber}</h2>
