@@ -207,6 +207,10 @@
                                 <label for="customerAddress">Address</label>
                                 <input type="text" id="customerAddress" placeholder="Full address">
                             </div>
+                            <div class="form-input-group">
+                                <label for="quotationSubject">Subject</label>
+                                <input type="text" id="quotationSubject" placeholder="Enter quotation subject">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,7 +219,7 @@
                 <div class="form-section">
                     <div class="form-section-title">Products</div>
                     <div id="quotationProducts">
-                        <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
+                        <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
                             <div class="form-input-group">
                                 <label>Product</label>
                                 <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
@@ -223,6 +227,10 @@
                                     <option value="manual" data-price="0" data-gst="0">Manual Entry</option>
                                 </select>
                                 <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
+                            </div>
+                            <div class="form-input-group">
+                                <label>HSN / ASC</label>
+                                <input type="text" class="item-hsn" placeholder="HSN or ASC code">
                             </div>
                             <div class="form-input-group">
                                 <label>Quantity</label>

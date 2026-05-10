@@ -185,6 +185,7 @@ class QuotationsManager {
             productOptions += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
         }
 
+        newRow.style.cssText = `display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);`;
         newRow.innerHTML = `
             <div class="form-input-group">
                 <label>Product</label>
@@ -192,6 +193,10 @@ class QuotationsManager {
                     ${productOptions}
                 </select>
                 <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
+            </div>
+            <div class="form-input-group">
+                <label>HSN / ASC</label>
+                <input type="text" class="item-hsn" placeholder="HSN or ASC code">
             </div>
             <div class="form-input-group">
                 <label>Quantity</label>
@@ -340,7 +345,7 @@ class QuotationsManager {
         // Reset products to single row
         const productsContainer = document.getElementById('quotationProducts');
         productsContainer.innerHTML = `
-            <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
+            <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
                 <div class="form-input-group">
                     <label>Product</label>
                     <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
@@ -348,6 +353,10 @@ class QuotationsManager {
                         <option value="manual" data-price="0" data-gst="0">Manual Entry</option>
                     </select>
                     <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
+                </div>
+                <div class="form-input-group">
+                    <label>HSN / ASC</label>
+                    <input type="text" class="item-hsn" placeholder="HSN or ASC code">
                 </div>
                 <div class="form-input-group">
                     <label>Quantity</label>
@@ -414,7 +423,9 @@ class QuotationsManager {
             const quantity = parseInt(quantityInput.value) || 1;
             const unitPrice = parseFloat(priceInput.value) || 0;
             const gstPercent = parseFloat(gstInput.value) || 0;
-            const total = parseFloat(totalInput.value) || 0;
+            const itemSubtotal = unitPrice * quantity;
+            const itemGST = (itemSubtotal * gstPercent) / 100;
+            const total = itemSubtotal + itemGST;
 
             if (!nameValue && (!selectedValue || selectedValue === 'manual')) {
                 return;
@@ -433,10 +444,12 @@ class QuotationsManager {
                 }
             }
 
+            const hsnCode = item.querySelector('.item-hsn') ? item.querySelector('.item-hsn').value.trim() : '';
             products.push({
                 productId: productId,
                 productName: productName,
                 brand: brand,
+                hsn: hsnCode,
                 quantity: quantity,
                 unitPrice: unitPrice,
                 gst: gstPercent,
@@ -462,9 +475,11 @@ class QuotationsManager {
             customerId = newCustomer.id;
         }
 
-        const subtotal = products.reduce((sum, p) => sum + p.total, 0);
-        const avgGST = products.length > 0 ? products.reduce((sum, p) => sum + p.gst, 0) / products.length : 0;
-        const gstAmount = calculateGST(subtotal, avgGST);
+        const subtotal = products.reduce((sum, p) => sum + (p.unitPrice * p.quantity), 0);
+        const gstAmount = products.reduce((sum, p) => {
+            const itemSubtotal = p.unitPrice * p.quantity;
+            return sum + ((itemSubtotal * p.gst) / 100);
+        }, 0);
         const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
         const discountAmount = (subtotal * discountPercent) / 100;
         const totalAmount = subtotal + gstAmount - discountAmount;
@@ -475,6 +490,7 @@ class QuotationsManager {
             customerEmail: customerEmail,
             customerPhone: customerPhone,
             customerAddress: customerAddress,
+            subject: document.getElementById('quotationSubject').value.trim(),
             products: products,
             subtotal: subtotal,
             gstAmount: gstAmount,
@@ -515,6 +531,7 @@ class QuotationsManager {
         document.getElementById('customerEmail').value = quotation.customerEmail;
         document.getElementById('customerPhone').value = quotation.customerPhone;
         document.getElementById('customerAddress').value = quotation.customerAddress;
+        document.getElementById('quotationSubject').value = quotation.subject || '';
         document.getElementById('quotationNotes').value = quotation.notes || '';
         document.getElementById('discountPercent').value = quotation.discountPercent || 0;
 
@@ -532,6 +549,7 @@ class QuotationsManager {
             productOptions += products.map(p => `<option value="${p.id}" ${p.id === item.productId ? 'selected' : ''} data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand})</option>`).join('');
             productOptions += `<option value="manual" data-price="0" data-gst="0" ${!item.productId ? 'selected' : ''}>Manual Entry</option>`;
 
+            newRow.style.cssText = `display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);`;
             newRow.innerHTML = `
                 <div class="form-input-group">
                     <label>Product</label>
@@ -539,6 +557,10 @@ class QuotationsManager {
                         ${productOptions}
                     </select>
                     <input type="text" class="item-name" placeholder="Enter product name" value="${item.productName}" oninput="quotationsManager.handleManualProductInput(this)">
+                </div>
+                <div class="form-input-group">
+                    <label>HSN / ASC</label>
+                    <input type="text" class="item-hsn" placeholder="HSN or ASC code" value="${item.hsn || ''}">
                 </div>
                 <div class="form-input-group">
                     <label>Quantity</label>
@@ -637,6 +659,7 @@ class QuotationsManager {
                     <div class="customer">
                         <h3>Bill To:</h3>
                         <p><strong>${quotation.customerName}</strong></p>
+                        <p><strong>Subject:</strong> ${quotation.subject || ''}</p>
                         <p>Email: ${quotation.customerEmail}</p>
                         <p>Phone: ${quotation.customerPhone}</p>
                         <p>Address: ${quotation.customerAddress}</p>
@@ -645,7 +668,9 @@ class QuotationsManager {
                     <table>
                         <thead>
                             <tr>
+                                <th>Item</th>
                                 <th>Product</th>
+                                <th>HSN / ASC</th>
                                 <th>Qty</th>
                                 <th>Unit Price</th>
                                 <th>GST %</th>
@@ -653,12 +678,14 @@ class QuotationsManager {
                             </tr>
                         </thead>
                         <tbody>
-                            ${quotation.products.map(p => `
+                            ${quotation.products.map((p, index) => `
                                 <tr>
-                                    <td>${p.productName} (${p.brand})</td>
+                                    <td>${index + 1}</td>
+                                    <td>${p.productName}${p.brand ? ` (${p.brand})` : ''}</td>
+                                    <td>${p.hsn || ''}</td>
                                     <td>${p.quantity}</td>
                                     <td>₹${p.unitPrice.toFixed(2)}</td>
-                                    <td>${p.gst}%</td>
+                                    <td>${p.gst.toFixed(2)}%</td>
                                     <td>₹${p.total.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
