@@ -9,6 +9,7 @@ class QuotationsManager {
         this.currentEditingId = null;
         this.currentFilter = 'all';
         this.initializeEventListeners();
+        this.setupStorageListener();
         this.loadQuotations();
         this.populateCustomerSelect();
         this.populateProducts();
@@ -160,8 +161,13 @@ class QuotationsManager {
         const selects = document.querySelectorAll('.product-select');
 
         selects.forEach(select => {
-            let options = '<option value="">-- Select Product --</option>';
-            options += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
+            let options = '';
+            if (products.length === 0) {
+                options = '<option value="" disabled selected>No products available</option>';
+            } else {
+                options = '<option value="">-- Select Product --</option>';
+                options += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
+            }
             select.innerHTML = options;
         });
     }
@@ -173,8 +179,13 @@ class QuotationsManager {
         newRow.style.cssText = `display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);`;
 
         const products = Storage.getAllProducts();
-        let productOptions = '<option value="">-- Select Product --</option>';
-        productOptions += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
+        let productOptions = '';
+        if (products.length === 0) {
+            productOptions = '<option value="" disabled selected>No products available</option>';
+        } else {
+            productOptions = '<option value="">-- Select Product --</option>';
+            productOptions += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
+        }
 
         newRow.innerHTML = `
             <div class="form-input-group">
@@ -311,45 +322,59 @@ class QuotationsManager {
 
     handleQuotationSubmit(event) {
         event.preventDefault();
+        this.saveQuotation('sent');
+    }
 
+    saveDraft() {
+        this.saveQuotation('draft');
+    }
+
+    saveQuotation(status) {
         const customerSelect = document.getElementById('customerSelect');
         const customerName = document.getElementById('customerName').value.trim();
         const customerEmail = document.getElementById('customerEmail').value.trim();
         const customerPhone = document.getElementById('customerPhone').value.trim();
         const customerAddress = document.getElementById('customerAddress').value.trim();
 
-        // Validate customer
         if (!customerName) {
             appManager.showToast('Please enter customer name', 'error');
             return;
         }
 
-        // Validate products
         const items = document.querySelectorAll('.quotation-item');
-        if (items.length === 0 || !items[0].querySelector('.product-select').value) {
-            appManager.showToast('Please add at least one product', 'error');
-            return;
-        }
-
-        // Collect product items
         const products = [];
+
         items.forEach(item => {
             const productSelect = item.querySelector('.product-select');
-            if (productSelect.value) {
+            const quantityInput = item.querySelector('.item-quantity');
+            const priceInput = item.querySelector('.item-price');
+            const totalInput = item.querySelector('.item-total');
+
+            if (productSelect && productSelect.value) {
                 const product = Storage.getProduct(parseInt(productSelect.value));
+                if (!product) return;
+
+                const quantity = parseInt(quantityInput.value) || 1;
+                const unitPrice = parseFloat(priceInput.value) || 0;
+                const total = parseFloat(totalInput.value) || 0;
+
                 products.push({
                     productId: product.id,
                     productName: product.name,
                     brand: product.brand,
-                    quantity: parseInt(item.querySelector('.item-quantity').value),
-                    unitPrice: parseFloat(item.querySelector('.item-price').value),
-                    gst: parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst),
-                    total: parseFloat(item.querySelector('.item-total').value)
+                    quantity: quantity,
+                    unitPrice: unitPrice,
+                    gst: parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst) || 0,
+                    total: total
                 });
             }
         });
 
-        // Get or create customer
+        if (products.length === 0) {
+            appManager.showToast('Please add at least one product', 'error');
+            return;
+        }
+
         let customerId;
         if (customerSelect.value) {
             customerId = parseInt(customerSelect.value);
@@ -363,7 +388,6 @@ class QuotationsManager {
             customerId = newCustomer.id;
         }
 
-        // Calculate totals
         const subtotal = products.reduce((sum, p) => sum + p.total, 0);
         const avgGST = products.length > 0 ? products.reduce((sum, p) => sum + p.gst, 0) / products.length : 0;
         const gstAmount = calculateGST(subtotal, avgGST);
@@ -384,36 +408,20 @@ class QuotationsManager {
             discountAmount: discountAmount,
             totalAmount: totalAmount,
             notes: document.getElementById('quotationNotes').value.trim(),
-            status: 'sent'
+            status: status
         };
 
-        // Save quotation
         if (this.currentEditingId) {
             Storage.updateQuotation(this.currentEditingId, quotationData);
-            appManager.showToast('Quotation updated successfully!', 'success');
+            appManager.showToast(status === 'draft' ? 'Draft saved successfully!' : 'Quotation updated successfully!', 'success');
         } else {
             const quotation = Storage.addQuotation(quotationData);
-            appManager.showToast('Quotation created successfully!', 'success');
+            appManager.showToast(status === 'draft' ? 'Draft saved successfully!' : 'Quotation created successfully!', 'success');
             this.currentEditingId = quotation.id;
         }
 
         this.closeQuotationModal();
         this.loadQuotations();
-    }
-
-    saveDraft() {
-        // Similar to submit but save as draft
-        const quotationForm = document.getElementById('quotationForm');
-        const submitButton = quotationForm.querySelector('button[type="submit"]');
-        
-        // Temporarily change status handling
-        const customerName = document.getElementById('customerName').value.trim();
-        if (!customerName) {
-            appManager.showToast('Please enter customer name', 'error');
-            return;
-        }
-
-        appManager.showToast('Draft saved successfully!', 'success');
     }
 
     editQuotation(id) {
@@ -686,6 +694,15 @@ class QuotationsManager {
         );
 
         this.displayQuotations(filtered);
+    }
+
+    setupStorageListener() {
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'products' || event.key === 'customers') {
+                this.populateCustomerSelect();
+                this.populateProducts();
+            }
+        });
     }
 }
 

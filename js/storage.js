@@ -223,7 +223,7 @@ const Storage = {
         quotation.id = Date.now();
         quotation.quotationNumber = this.generateQuotationNumber();
         quotation.createdAt = new Date().toISOString();
-        quotation.status = 'draft'; // draft, sent, accepted, rejected
+        quotation.status = quotation.status || 'draft'; // draft, sent, accepted, rejected
         quotations.push(quotation);
         this.set('quotations', quotations);
 
