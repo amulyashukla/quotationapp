@@ -224,18 +224,20 @@ class QuotationsManager {
     updateItemTotal(element) {
         const row = element.closest('.quotation-item');
         const productSelect = row.querySelector('.product-select');
-        const quantity = row.querySelector('.item-quantity').value;
+        const quantityInput = row.querySelector('.item-quantity');
         const priceInput = row.querySelector('.item-price');
         const totalInput = row.querySelector('.item-total');
 
-        if (productSelect.value) {
+        const quantity = parseInt(quantityInput.value) || 1;
+
+        if (productSelect && productSelect.value) {
             const option = productSelect.options[productSelect.selectedIndex];
             const price = parseFloat(option.dataset.price) || 0;
             priceInput.value = price.toFixed(2);
             totalInput.value = (price * quantity).toFixed(2);
         } else {
-            priceInput.value = '';
-            totalInput.value = '';
+            priceInput.value = '0.00';
+            totalInput.value = '0.00';
         }
 
         this.calculateTotals();

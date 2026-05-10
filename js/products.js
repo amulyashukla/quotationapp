@@ -210,6 +210,8 @@ class ProductsManager {
             motors: 'Motors',
             valves: 'Valves',
             compressors: 'Compressors',
+            'spare-part': 'Spare Part',
+            'pneumatic-pumps': 'Pneumatic Pumps',
             accessories: 'Accessories',
             other: 'Other'
         };
