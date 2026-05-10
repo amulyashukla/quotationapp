@@ -161,13 +161,11 @@ class QuotationsManager {
         const selects = document.querySelectorAll('.product-select');
 
         selects.forEach(select => {
-            let options = '';
-            if (products.length === 0) {
-                options = '<option value="" disabled selected>No products available</option>';
-            } else {
-                options = '<option value="">-- Select Product --</option>';
+            let options = '<option value="">-- Select Product --</option>';
+            if (products.length > 0) {
                 options += products.map(p => `<option value="${p.id}" data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand}) - ${formatCurrency(p.price)}</option>`).join('');
             }
+            options += '<option value="manual" data-price="0" data-gst="0">Manual Entry</option>';
             select.innerHTML = options;
         });
     }
@@ -190,9 +188,10 @@ class QuotationsManager {
         newRow.innerHTML = `
             <div class="form-input-group">
                 <label>Product</label>
-                <select class="product-select" onchange="quotationsManager.updateItemTotal(this)">
+                <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
                     ${productOptions}
                 </select>
+                <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
             </div>
             <div class="form-input-group">
                 <label>Quantity</label>
@@ -200,7 +199,7 @@ class QuotationsManager {
             </div>
             <div class="form-input-group">
                 <label>Unit Price</label>
-                <input type="number" class="item-price" step="0.01" readonly style="background: var(--light-bg);">
+                <input type="number" class="item-price" step="0.01" min="0" onchange="quotationsManager.updateItemTotal(this)">
             </div>
             <div class="form-input-group">
                 <label>Total</label>
@@ -229,18 +228,49 @@ class QuotationsManager {
         const totalInput = row.querySelector('.item-total');
 
         const quantity = parseInt(quantityInput.value) || 1;
+        let price = parseFloat(priceInput.value) || 0;
 
-        if (productSelect && productSelect.value) {
+        if (productSelect && productSelect.value && productSelect.value !== 'manual') {
             const option = productSelect.options[productSelect.selectedIndex];
-            const price = parseFloat(option.dataset.price) || 0;
+            price = parseFloat(option.dataset.price) || 0;
             priceInput.value = price.toFixed(2);
-            totalInput.value = (price * quantity).toFixed(2);
-        } else {
-            priceInput.value = '0.00';
-            totalInput.value = '0.00';
         }
 
+        totalInput.value = (price * quantity).toFixed(2);
         this.calculateTotals();
+    }
+
+    handleProductSelection(element) {
+        const row = element.closest('.quotation-item');
+        const itemName = row.querySelector('.item-name');
+        const priceInput = row.querySelector('.item-price');
+        const quantityInput = row.querySelector('.item-quantity');
+        const selectedValue = element.value;
+
+        if (selectedValue && selectedValue !== 'manual') {
+            const option = element.options[element.selectedIndex];
+            const price = parseFloat(option.dataset.price) || 0;
+            itemName.value = option.textContent.split(' - ')[0].trim();
+            priceInput.value = price.toFixed(2);
+        } else if (selectedValue === 'manual') {
+            itemName.value = '';
+            priceInput.value = '0.00';
+        }
+
+        priceInput.removeAttribute('readonly');
+        quantityInput.value = quantityInput.value || 1;
+        this.updateItemTotal(priceInput);
+    }
+
+    handleManualProductInput(element) {
+        const row = element.closest('.quotation-item');
+        const productSelect = row.querySelector('.product-select');
+
+        if (element.value.trim()) {
+            productSelect.value = 'manual';
+        }
+
+        this.updateItemTotal(element);
     }
 
     calculateTotals() {
@@ -251,7 +281,7 @@ class QuotationsManager {
         items.forEach(item => {
             const total = parseFloat(item.querySelector('.item-total').value) || 0;
             const productSelect = item.querySelector('.product-select');
-            const gstPercent = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst) || 0;
+            const gstPercent = parseFloat(productSelect.options[productSelect.selectedIndex]?.dataset.gst) || 0;
 
             subtotal += total;
             totalGST += (total * gstPercent) / 100;
@@ -294,9 +324,11 @@ class QuotationsManager {
             <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
                 <div class="form-input-group">
                     <label>Product</label>
-                    <select class="product-select" onchange="quotationsManager.updateItemTotal(this)">
+                    <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
                         <option value="">-- Select Product --</option>
+                        <option value="manual" data-price="0" data-gst="0">Manual Entry</option>
                     </select>
+                    <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
                 </div>
                 <div class="form-input-group">
                     <label>Quantity</label>
@@ -304,7 +336,7 @@ class QuotationsManager {
                 </div>
                 <div class="form-input-group">
                     <label>Unit Price</label>
-                    <input type="number" class="item-price" step="0.01" readonly style="background: var(--light-bg);">
+                    <input type="number" class="item-price" step="0.01" min="0" onchange="quotationsManager.updateItemTotal(this)">
                 </div>
                 <div class="form-input-group">
                     <label>Total</label>
@@ -348,28 +380,47 @@ class QuotationsManager {
 
         items.forEach(item => {
             const productSelect = item.querySelector('.product-select');
+            const itemNameInput = item.querySelector('.item-name');
             const quantityInput = item.querySelector('.item-quantity');
             const priceInput = item.querySelector('.item-price');
             const totalInput = item.querySelector('.item-total');
 
-            if (productSelect && productSelect.value) {
-                const product = Storage.getProduct(parseInt(productSelect.value));
-                if (!product) return;
+            const selectedValue = productSelect ? productSelect.value : '';
+            const nameValue = itemNameInput ? itemNameInput.value.trim() : '';
+            const quantity = parseInt(quantityInput.value) || 1;
+            const unitPrice = parseFloat(priceInput.value) || 0;
+            const total = parseFloat(totalInput.value) || 0;
 
-                const quantity = parseInt(quantityInput.value) || 1;
-                const unitPrice = parseFloat(priceInput.value) || 0;
-                const total = parseFloat(totalInput.value) || 0;
-
-                products.push({
-                    productId: product.id,
-                    productName: product.name,
-                    brand: product.brand,
-                    quantity: quantity,
-                    unitPrice: unitPrice,
-                    gst: parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst) || 0,
-                    total: total
-                });
+            if (!nameValue && (!selectedValue || selectedValue === 'manual')) {
+                return;
             }
+
+            let productId = null;
+            let productName = nameValue;
+            let brand = '';
+            let gst = 0;
+
+            if (selectedValue && selectedValue !== 'manual') {
+                const product = Storage.getProduct(parseInt(selectedValue));
+                if (product) {
+                    productId = product.id;
+                    productName = productName || product.name;
+                    brand = product.brand;
+                    gst = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.gst) || 0;
+                }
+            } else {
+                gst = parseFloat(productSelect.options[productSelect.selectedIndex]?.dataset.gst) || 0;
+            }
+
+            products.push({
+                productId: productId,
+                productName: productName,
+                brand: brand,
+                quantity: quantity,
+                unitPrice: unitPrice,
+                gst: gst,
+                total: total
+            });
         });
 
         if (products.length === 0) {
@@ -458,13 +509,15 @@ class QuotationsManager {
             const products = Storage.getAllProducts();
             let productOptions = '<option value="">-- Select Product --</option>';
             productOptions += products.map(p => `<option value="${p.id}" ${p.id === item.productId ? 'selected' : ''} data-price="${p.price}" data-gst="${p.gst}">${p.name} (${p.brand})</option>`).join('');
+            productOptions += `<option value="manual" data-price="0" data-gst="0" ${!item.productId ? 'selected' : ''}>Manual Entry</option>`;
 
             newRow.innerHTML = `
                 <div class="form-input-group">
                     <label>Product</label>
-                    <select class="product-select" onchange="quotationsManager.updateItemTotal(this)">
+                    <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
                         ${productOptions}
                     </select>
+                    <input type="text" class="item-name" placeholder="Enter product name" value="${item.productName}" oninput="quotationsManager.handleManualProductInput(this)">
                 </div>
                 <div class="form-input-group">
                     <label>Quantity</label>
@@ -472,7 +525,7 @@ class QuotationsManager {
                 </div>
                 <div class="form-input-group">
                     <label>Unit Price</label>
-                    <input type="number" class="item-price" step="0.01" value="${item.unitPrice}" readonly style="background: var(--light-bg);">
+                    <input type="number" class="item-price" step="0.01" min="0" value="${item.unitPrice}" onchange="quotationsManager.updateItemTotal(this)">
                 </div>
                 <div class="form-input-group">
                     <label>Total</label>

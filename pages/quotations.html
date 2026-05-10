@@ -202,9 +202,11 @@
                         <div class="quotation-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; gap: var(--spacing-md); margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--light-bg); border-radius: var(--radius-md);">
                             <div class="form-input-group">
                                 <label>Product</label>
-                                <select class="product-select" onchange="quotationsManager.updateItemTotal(this)">
+                                <select class="product-select" onchange="quotationsManager.handleProductSelection(this)">
                                     <option value="">-- Select Product --</option>
+                                    <option value="manual" data-price="0" data-gst="0">Manual Entry</option>
                                 </select>
+                                <input type="text" class="item-name" placeholder="Enter product name" oninput="quotationsManager.handleManualProductInput(this)">
                             </div>
                             <div class="form-input-group">
                                 <label>Quantity</label>
@@ -212,7 +214,7 @@
                             </div>
                             <div class="form-input-group">
                                 <label>Unit Price</label>
-                                <input type="number" class="item-price" step="0.01" readonly style="background: var(--light-bg);">
+                                <input type="number" class="item-price" step="0.01" min="0" onchange="quotationsManager.updateItemTotal(this)">
                             </div>
                             <div class="form-input-group">
                                 <label>Total</label>
