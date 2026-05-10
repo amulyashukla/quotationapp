@@ -612,42 +612,357 @@ class QuotationsManager {
             <html>
             <head>
                 <meta charset="UTF-8">
+                <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
-                    .quotation { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; }
-                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0066cc; padding-bottom: 20px; margin-bottom: 20px; }
-                    .company-info h1 { margin: 0; color: #0066cc; }
-                    .company-info p { margin: 5px 0; font-size: 12px; color: #666; }
-                    .quotation-number { text-align: right; }
-                    .quotation-number h2 { margin: 0; color: #0066cc; }
-                    .quotation-number p { margin: 5px 0; font-size: 12px; }
-                    .customer { margin: 20px 0; padding: 15px; background: #f0f4f8; border-left: 4px solid #0066cc; }
-                    .customer h3 { margin: 0 0 10px 0; color: #333; }
-                    .customer p { margin: 5px 0; font-size: 14px; }
-                    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                    th { background: #0066cc; color: white; padding: 10px; text-align: left; font-weight: 600; }
-                    td { padding: 10px; border-bottom: 1px solid #ddd; }
-                    tr:hover { background: #f5f5f5; }
-                    .totals { margin: 20px 0; }
-                    .total-row { display: flex; justify-content: flex-end; padding: 10px 0; }
-                    .total-label { font-weight: 600; margin-right: 50px; }
-                    .total-value { font-weight: 600; color: #0066cc; }
-                    .terms { margin: 20px 0; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-size: 12px; }
-                    .terms h4 { margin: 0 0 10px 0; }
-                    .signature { margin-top: 40px; display: flex; justify-content: space-between; }
-                    .sig-line { border-top: 1px solid #000; width: 200px; text-align: center; margin-top: 10px; }
-                    .print-button { text-align: center; padding: 20px 0; }
-                    button { background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+                    body {
+                        font-family: 'Poppins', sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        background: white;
+                        color: #1a2332;
+                        line-height: 1.6;
+                        position: relative;
+                    }
+
+                    /* Watermark */
+                    body::before {
+                        content: 'AKB Engineering';
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) rotate(-45deg);
+                        font-size: 120px;
+                        color: rgba(0, 102, 204, 0.05);
+                        z-index: -1;
+                        pointer-events: none;
+                        font-weight: 700;
+                    }
+
+                    .quotation {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background: white;
+                        border: 1px solid #e0e8f0;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                    }
+
+                    /* Header */
+                    .header {
+                        background: linear-gradient(135deg, #0066cc 0%, #3399ff 100%);
+                        color: white;
+                        padding: 30px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        position: relative;
+                    }
+
+                    .company-info {
+                        flex: 1;
+                    }
+
+                    .company-info h1 {
+                        margin: 0 0 5px 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .company-info h2 {
+                        margin: 0 0 15px 0;
+                        font-size: 18px;
+                        font-weight: 500;
+                        opacity: 0.9;
+                    }
+
+                    .company-info p {
+                        margin: 3px 0;
+                        font-size: 13px;
+                        opacity: 0.9;
+                    }
+
+                    .quotation-number {
+                        text-align: right;
+                        background: rgba(255, 255, 255, 0.1);
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        backdrop-filter: blur(10px);
+                    }
+
+                    .quotation-number h2 {
+                        margin: 0;
+                        font-size: 24px;
+                        font-weight: 600;
+                    }
+
+                    .quotation-number p {
+                        margin: 5px 0 0 0;
+                        font-size: 12px;
+                        opacity: 0.8;
+                    }
+
+                    /* Quotation Title */
+                    .quotation-title {
+                        text-align: center;
+                        padding: 20px;
+                        background: #f8fafc;
+                        border-bottom: 1px solid #e0e8f0;
+                    }
+
+                    .quotation-title h1 {
+                        margin: 0;
+                        font-size: 32px;
+                        font-weight: 700;
+                        color: #0066cc;
+                        letter-spacing: 2px;
+                    }
+
+                    /* Client Info */
+                    .client-info {
+                        padding: 25px 30px;
+                        background: #f8fafc;
+                        border-bottom: 1px solid #e0e8f0;
+                    }
+
+                    .client-info h3 {
+                        margin: 0 0 15px 0;
+                        color: #0066cc;
+                        font-size: 16px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .client-info .info-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 15px;
+                    }
+
+                    .client-info p {
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.5;
+                    }
+
+                    .client-info strong {
+                        color: #1a2332;
+                        font-weight: 600;
+                    }
+
+                    /* Table */
+                    .products-table {
+                        margin: 30px;
+                    }
+
+                    .products-table table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                    }
+
+                    .products-table th {
+                        background: #0066cc;
+                        color: white;
+                        padding: 15px 12px;
+                        text-align: left;
+                        font-weight: 600;
+                        font-size: 13px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .products-table td {
+                        padding: 12px;
+                        border-bottom: 1px solid #e0e8f0;
+                        font-size: 14px;
+                    }
+
+                    .products-table tbody tr:nth-child(even) {
+                        background: #f8fafc;
+                    }
+
+                    .products-table tbody tr:hover {
+                        background: #e0f2fe;
+                    }
+
+                    .products-table .gst-col,
+                    .products-table .total-col {
+                        font-weight: 600;
+                        color: #0066cc;
+                    }
+
+                    /* Summary */
+                    .summary {
+                        margin: 30px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        padding: 20px;
+                        border: 1px solid #e0e8f0;
+                    }
+
+                    .summary-row {
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: center;
+                        padding: 8px 0;
+                        border-bottom: 1px solid #e0e8f0;
+                    }
+
+                    .summary-row:last-child {
+                        border-bottom: none;
+                        background: #0066cc;
+                        color: white;
+                        padding: 15px;
+                        border-radius: 6px;
+                        margin-top: 10px;
+                    }
+
+                    .summary-label {
+                        font-weight: 600;
+                        margin-right: 30px;
+                        font-size: 14px;
+                    }
+
+                    .summary-value {
+                        font-weight: 600;
+                        color: #0066cc;
+                        font-size: 16px;
+                    }
+
+                    .summary-row:last-child .summary-label,
+                    .summary-row:last-child .summary-value {
+                        color: white;
+                        font-size: 18px;
+                        font-weight: 700;
+                    }
+
+                    /* Notes */
+                    .notes {
+                        margin: 30px;
+                        padding: 20px;
+                        background: #fff8e1;
+                        border-left: 4px solid #ffb300;
+                        border-radius: 0 8px 8px 0;
+                    }
+
+                    .notes h4 {
+                        margin: 0 0 10px 0;
+                        color: #f57c00;
+                        font-size: 16px;
+                        font-weight: 600;
+                    }
+
+                    .notes p {
+                        margin: 0;
+                        font-size: 14px;
+                        line-height: 1.6;
+                    }
+
+                    /* Terms */
+                    .terms {
+                        margin: 30px;
+                        padding: 20px;
+                        background: #f0f4f8;
+                        border-radius: 8px;
+                        border: 1px solid #e0e8f0;
+                    }
+
+                    .terms h4 {
+                        margin: 0 0 15px 0;
+                        color: #0066cc;
+                        font-size: 16px;
+                        font-weight: 600;
+                    }
+
+                    .terms p {
+                        margin: 0 0 10px 0;
+                        font-size: 13px;
+                        line-height: 1.6;
+                    }
+
+                    /* Footer */
+                    .footer {
+                        margin: 30px;
+                        padding-top: 20px;
+                        border-top: 2px solid #e0e8f0;
+                        text-align: center;
+                    }
+
+                    .thank-you {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #0066cc;
+                        margin-bottom: 20px;
+                    }
+
+                    .signature-section {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 40px;
+                    }
+
+                    .signature-box {
+                        flex: 1;
+                        text-align: center;
+                        margin: 0 20px;
+                    }
+
+                    .signature-line {
+                        border-top: 1px solid #1a2332;
+                        width: 200px;
+                        margin: 10px auto 5px;
+                    }
+
+                    .signature-label {
+                        font-size: 12px;
+                        color: #666;
+                        font-weight: 500;
+                    }
+
+                    .footer-contact {
+                        margin-top: 30px;
+                        padding-top: 20px;
+                        border-top: 1px solid #e0e8f0;
+                        font-size: 12px;
+                        color: #666;
+                        text-align: center;
+                    }
+
+                    .footer-contact p {
+                        margin: 3px 0;
+                    }
+
+                    /* Print styles */
+                    @media print {
+                        body {
+                            padding: 0;
+                        }
+                        .quotation {
+                            box-shadow: none;
+                            border: none;
+                        }
+                        .products-table tbody tr:hover {
+                            background: transparent;
+                        }
+                    }
                 </style>
             </head>
             <body>
                 <div class="quotation">
+                    <!-- Header -->
                     <div class="header">
                         <div class="company-info">
-                            <h1 style="color: #0066cc; font-weight: 800; letter-spacing: 0.12em; text-transform: lowercase;">grundfos</h1>
+                            <h1>grundfos</h1>
                             <h2>${company.name}</h2>
+                            <p><strong>GSTIN:</strong> 22AAAAA0000A1Z5</p>
                             <p><strong>Phone:</strong> 9935203521</p>
                             <p><strong>Email:</strong> akbengineering99@gmail.com</p>
+                            <p><strong>Website:</strong> www.akbengineering.com</p>
                             <p><strong>Address:</strong> Bhurarani, Rudrapur (U.S. Nagar), Uttarakhand - 263153</p>
                         </div>
                         <div class="quotation-number">
@@ -656,91 +971,117 @@ class QuotationsManager {
                         </div>
                     </div>
 
-                    <div class="customer">
-                        <h3>Bill To:</h3>
-                        <p><strong>${quotation.customerName}</strong></p>
-                        <p><strong>Subject:</strong> ${quotation.subject || ''}</p>
-                        <p>Email: ${quotation.customerEmail}</p>
-                        <p>Phone: ${quotation.customerPhone}</p>
-                        <p>Address: ${quotation.customerAddress}</p>
+                    <!-- Quotation Title -->
+                    <div class="quotation-title">
+                        <h1>QUOTATION</h1>
                     </div>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Product</th>
-                                <th>HSN / ASC</th>
-                                <th>Qty</th>
-                                <th>Unit Price</th>
-                                <th>GST %</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${quotation.products.map((p, index) => `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${p.productName}${p.brand ? ` (${p.brand})` : ''}</td>
-                                    <td>${p.hsn || ''}</td>
-                                    <td>${p.quantity}</td>
-                                    <td>₹${p.unitPrice.toFixed(2)}</td>
-                                    <td>${p.gst.toFixed(2)}%</td>
-                                    <td>₹${p.total.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-
-                    <div class="totals">
-                        <div class="total-row">
-                            <span class="total-label">Subtotal:</span>
-                            <span class="total-value">₹${quotation.subtotal.toFixed(2)}</span>
+                    <!-- Client Info -->
+                    <div class="client-info">
+                        <h3>Bill To:</h3>
+                        <div class="info-grid">
+                            <div>
+                                <p><strong>${quotation.customerName}</strong></p>
+                                <p><strong>Subject:</strong> ${quotation.subject || ''}</p>
+                                <p><strong>Address:</strong> ${quotation.customerAddress}</p>
+                            </div>
+                            <div>
+                                <p><strong>Email:</strong> ${quotation.customerEmail}</p>
+                                <p><strong>Phone:</strong> ${quotation.customerPhone}</p>
+                            </div>
                         </div>
-                        <div class="total-row">
-                            <span class="total-label">GST (Avg):</span>
-                            <span class="total-value">₹${quotation.gstAmount.toFixed(2)}</span>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="products-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Product</th>
+                                    <th>HSN / ASC</th>
+                                    <th>Qty</th>
+                                    <th>Unit Price</th>
+                                    <th class="gst-col">GST %</th>
+                                    <th class="total-col">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${quotation.products.map((p, index) => `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${p.productName}${p.brand ? ` (${p.brand})` : ''}</td>
+                                        <td>${p.hsn || ''}</td>
+                                        <td>${p.quantity}</td>
+                                        <td>₹${p.unitPrice.toFixed(2)}</td>
+                                        <td class="gst-col">${p.gst.toFixed(2)}%</td>
+                                        <td class="total-col">₹${p.total.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Subtotal:</span>
+                            <span class="summary-value">₹${quotation.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">GST (Total):</span>
+                            <span class="summary-value">₹${quotation.gstAmount.toFixed(2)}</span>
                         </div>
                         ${quotation.discountPercent > 0 ? `
-                            <div class="total-row">
-                                <span class="total-label">Discount (${quotation.discountPercent}%):</span>
-                                <span class="total-value">-₹${quotation.discountAmount.toFixed(2)}</span>
+                            <div class="summary-row">
+                                <span class="summary-label">Discount (${quotation.discountPercent}%):</span>
+                                <span class="summary-value">-₹${quotation.discountAmount.toFixed(2)}</span>
                             </div>
                         ` : ''}
-                        <div class="total-row" style="border-top: 2px solid #0066cc; padding-top: 10px; margin-top: 10px;">
-                            <span class="total-label">Total Amount:</span>
-                            <span class="total-value" style="font-size: 18px;">₹${quotation.totalAmount.toFixed(2)}</span>
+                        <div class="summary-row">
+                            <span class="summary-label">Grand Total:</span>
+                            <span class="summary-value">₹${quotation.totalAmount.toFixed(2)}</span>
                         </div>
                     </div>
 
                     ${quotation.notes ? `
-                        <div class="terms">
-                            <h4>Notes & Terms:</h4>
+                        <div class="notes">
+                            <h4>Notes:</h4>
                             <p>${quotation.notes}</p>
                         </div>
                     ` : ''}
 
                     <div class="terms">
-                        <h4>Standard Terms & Conditions:</h4>
-                        <p>${company.terms}</p>
+                        <h4>Terms & Conditions:</h4>
+                        <p>1. Payment terms: 50% advance, 50% before delivery</p>
+                        <p>2. Delivery within 7-10 working days from order confirmation</p>
+                        <p>3. Warranty: 1 year on manufacturing defects</p>
+                        <p>4. All disputes subject to Rudrapur jurisdiction</p>
+                        <p>5. Prices are valid for 30 days from quotation date</p>
                     </div>
 
-                    <div class="signature">
-                        <div>
-                            <p>For ${company.name}</p>
-                            <div class="sig-line"></div>
-                            <p>Authorized Signature</p>
+                    <div class="footer">
+                        <div class="thank-you">Thank you for your business!</div>
+
+                        <div class="signature-section">
+                            <div class="signature-box">
+                                <p>Customer Signature</p>
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Date: _______________</p>
+                            </div>
+                            <div class="signature-box">
+                                <p>For ${company.name}</p>
+                                <div class="signature-line"></div>
+                                <p class="signature-label">Authorized Signature</p>
+                            </div>
                         </div>
-                        <div>
-                            <p>Customer Signature</p>
-                            <div class="sig-line"></div>
-                            <p>Approved by</p>
+
+                        <div class="footer-contact">
+                            <p><strong>${company.name}</strong></p>
+                            <p>Phone: 9935203521 | Email: akbengineering99@gmail.com</p>
+                            <p>Bhurarani, Rudrapur (U.S. Nagar), Uttarakhand - 263153</p>
                         </div>
                     </div>
-                </div>
-
-                <div class="print-button">
-                    <button onclick="window.print()">Print Quotation</button>
                 </div>
             </body>
             </html>
